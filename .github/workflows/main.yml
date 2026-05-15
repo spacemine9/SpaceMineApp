@@ -3,12 +3,24 @@ on: push
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Buildozer ile APK Pisir
-        uses: NiklasHygum/buildozer-action@v1
+      - name: Gerekli Sistem Paketlerini Kur
+        run: |
+          sudo apt update
+          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          pip3 install --upgrade pip
+          pip3 install buildozer setuptools cython
+
+      - name: Buildozer ile APK'yi Pisir
+        run: |
+          yes | buildozer -v android debug
+        continue-on-error: false
+
+      - name: APK Dosyasini Yukle (Artifacts)
+        uses: actions/upload-artifact@v3
         with:
-          buildozer_version: master
-          python_version: 3.8
+          name: SpaceMine-Android-Paketi
+          path: bin/*.apk
